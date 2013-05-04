@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>Check graylog2 stream by emind-systems</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Check graylog2 stream</h1>
+        <h2>Nagios Plugin to check Graylog2 stream statistics and alarm status</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/emind-systems/check_graylog2_stream/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/emind-systems/check_graylog2_stream/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/emind-systems/check_graylog2_stream" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h2>check_graylog2_stream.sh</h2>
+
+<h1></h1>
+
+<p>check_graylog2_stream is a check script for nagios that check graylog2 streams.
+The script checks for the last-alarm time of the specified stream, if the time is within the specified age (sec), a CRITICAL alarm is raised, otherwise OK.</p>
+
+<h3>Usage:</h3>
+
+<ul>
+<li>./check_graylog2_stream.sh -g &lt;graylog server url&gt; -k &lt;graylog api_key&gt; -t &lt;alarm age&gt; -s &lt;stream name&gt;</li>
+</ul><h3>Example:</h3>
+
+<ul>
+<li>./check_graylog2_stream.sh -g <a href="http://graylog2.mycorp.com">http://graylog2.mycorp.com</a> -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name</li>
+</ul><h3>Requirements:</h3>
+
+<ul>
+<li>check graylog2 script use jshon command line that require the jansson</li>
+</ul><h3>Installation:</h3>
+
+<ul>
+<li><p>Download and install jansson-2.4
+cd /usr/local/src
+wget <a href="http://www.digip.org/jansson/releases/jansson-2.4.tar.gz">http://www.digip.org/jansson/releases/jansson-2.4.tar.gz</a>
+tar zxvf jansson-2.4.tar.gz
+cd jansson-2.4
+./configure
+make
+make install</p></li>
+<li><p>Download and install jshon
+cd /usr/local/src/
+wget <a href="http://kmkeen.com/jshon/jshon.tar.gz">http://kmkeen.com/jshon/jshon.tar.gz</a>
+tar zxvf jshon.tar.gz
+cd jshon-20120914
+make
+cp jshon /bin/</p></li>
+</ul><hr><p>Copyright 2013 Emind Systems Ltd - htttp://<a href="http://www.emind.co">www.emind.co</a> </p>
+
+<hr><p>This file is part of Emind Systems DevOps Tool set.
+Emind Systems DevOps Tool set is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+Emind Systems DevOps Tool set is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with Emind Systems DevOps Tool set. If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p>
+      </section>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-7810591-6");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
