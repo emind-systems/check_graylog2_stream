@@ -8,14 +8,9 @@ You should have received a copy of the GNU General Public License along with Emi
 check_graylog2_stream is a check script for nagios that check graylog2 streams.
 The script checks for the last-alarm time of the specified stream, if the time is within the specified age (sec), a CRITICAL alarm is raised, otherwise OK.
 
-Input paramets:
--g <graylog server url>
--k <graylog api_key>
--t <alarm age (sec)>
--s <stream name>
 
 Usage:
-	./check_graylog2_stream.sh -g <graylog server url> -k <graylog api_key> -t <alarm age> -s <stream name>
+	./check_graylog2_stream.sh -g \<graylog server url> -k \<graylog api_key> -t \<alarm age> -s \<stream name>
 
 Example:
 	./check_graylog2_stream.sh -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name
