@@ -30,7 +30,10 @@ Installation:
 		cd jshon-20120914
 		make
 		cp jshon /bin/
-
+	* Update libs		
+		cd /usr/local/lib
+		ln -s /usr/local/lib/libjansson.so.4 /usr/lib/libjansson.so.4
+		ldconfig
 
 
 Copyright 2013 Emind Systems Ltd - htttp://www.emind.co
