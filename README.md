@@ -17,7 +17,7 @@ Usage:
 Options:
 
 	-i , --INVERT
-   	 (default: OFF)
+   	 inverts exit code interpretation (default: OFF)
 
 Examples:
 
