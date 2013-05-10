@@ -31,6 +31,7 @@ Requirements:
 	The check graylog2 script uses jshon command line that further requires jansson
 
 Installation:
+
 	* Download and install jansson-2.4
 		cd /usr/local/src
 		wget http://www.digip.org/jansson/releases/jansson-2.4.tar.gz
@@ -39,6 +40,7 @@ Installation:
 		./configure
 		make
 		make install
+
 	* Download and install jshon
 		cd /usr/local/src/
 		wget http://kmkeen.com/jshon/jshon.tar.gz
@@ -46,6 +48,7 @@ Installation:
 		cd jshon-20120914
 		make
 		cp jshon /bin/
+
 	* Update libs		
 		cd /usr/local/lib
 		ln -s /usr/local/lib/libjansson.so.4 /usr/lib/libjansson.so.4
