@@ -1,18 +1,34 @@
 check_graylog2_stream.sh
 ========================
 
-check_graylog2_stream is a check script for nagios that check graylog2 streams.
-The script checks for the last-alarm time of the specified stream, if the time is within the specified age (sec), a CRITICAL alarm is raised, otherwise OK.
+check_graylog2_stream is a check script for nagios that verifies graylog2 streams.
+
+The script checks for the last-alarm time of the specified stream and:
+
+1. If the time is within the specified age (sec), a CRITICAL alarm is raised, otherwise OK.
+
+2. By using the inversion option (-i), if the time is within the specified age (sec), an OK status is returned, otherwise a CRITICAL alarm is triggered.
 
 
 Usage:
 	./check_graylog2_stream.sh -g \<graylog server url> -k \<graylog api_key> -t \<alarm age> -s \<stream name>
+	
+Options:
+	-i , --INVERT
+   	 (default: OFF)
 
-Example:
-	./check_graylog2_stream.sh -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name
+Examples:
+
+	1. INVERT=OFF (default) :
+	
+	./check_graylog2_stream.sh -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name      --> will return CRITICAL if alarm is ON for more than 300 secs
+
+	2. INVERT=ON (-i)
+	
+	./check_graylog2_stream.sh -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name -i    --> will return CRITICAL if alarm is OFF for more than 300 secs
 
 Requirements:
-	check graylog2 script use jshon command line that require the jansson
+	The check graylog2 script uses jshon command line that further requires jansson
 
 Installation:
 	* Download and install jansson-2.4
