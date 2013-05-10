@@ -11,46 +11,59 @@ SERVER_URL=""
 API_KEY=""
 TIME_DIFF=""
 STREAM_NAME=""
+INVERT="OFF"
+
+function write_log (){
+        logger  -t "check_graylog_stream" "pid=$$ Msg=$*"
+}
 
 function get_streams_json()
 {
-	curl -s -o ${GRAYLOG2_STREAMS_FILE} ${STREAM_URL}
+        curl -s -o ${GRAYLOG2_STREAMS_FILE} ${STREAM_URL}
+        if [ $? -ne 0 ]; then
+                write_log "failed to fetch json from ${STREAM_URL}"
+                exit 99
+        fi
 }
 
 function get_stream_index
 {
-	TARGET_STREAM_TITLE=$1
-	STREAM_INDEX=0
-	CURRENT_STREAM_TITLE=""
-	SEARCH_STATUS=false
-	FIRST_STREAM_TITLE=$(jshon -e ${STREAM_INDEX} -e "title" -u < ${GRAYLOG2_STREAMS_FILE})
-
-	while true; do
-		CURRENT_STREAM_TITLE=$(jshon -e ${STREAM_INDEX} -e "title" -u < ${GRAYLOG2_STREAMS_FILE})
-		if [ "${TARGET_STREAM_TITLE}" == "${CURRENT_STREAM_TITLE}" ]; then
-				SEARCH_STATUS=true
-				break
-		elif [ ${STREAM_INDEX} -gt 0 ] && [ "${CURRENT_STREAM_TITLE}" == "${FIRST_STREAM_TITLE}" ]; then
-				break
-		fi
-		STREAM_INDEX=$(( ${STREAM_INDEX} + 1 ))
-	done
+        TARGET_STREAM_TITLE=$1
+        STREAM_INDEX=0
+        CURRENT_STREAM_TITLE=""
+        SEARCH_STATUS=false
+        FIRST_STREAM_TITLE=$(jshon -e ${STREAM_INDEX} -e "title" -u < ${GRAYLOG2_STREAMS_FILE})
+         write_log "FIRST_STREAM_TITLE=${FIRST_STREAM_TITLE}"
+        while true; do
+                CURRENT_STREAM_TITLE=$(jshon -e ${STREAM_INDEX} -e "title" -u < ${GRAYLOG2_STREAMS_FILE})
+                if [ "${TARGET_STREAM_TITLE}" == "${CURRENT_STREAM_TITLE}" ]; then
+                                SEARCH_STATUS=true
+                                break
+                elif [ ${STREAM_INDEX} -gt 0 ] && [ "${CURRENT_STREAM_TITLE}" == "${FIRST_STREAM_TITLE}" ]; then
+                                break
+                fi
+                STREAM_INDEX=$(( ${STREAM_INDEX} + 1 ))
+        done
+        write_log "TARGET_STREAM_TITLE=${TARGET_STREAM_TITLE} STREAM_INDEX=${STREAM_INDEX}"
 }
 
-while getopts g:k:t:s: flag; do
+while getopts ig:k:t:s: flag; do
   case $flag in
     g)
-		SERVER_URL=$OPTARG
-		;;
+                SERVER_URL=$OPTARG
+                ;;
     k)
-		API_KEY=$OPTARG
-		;;
+                API_KEY=$OPTARG
+                ;;
     t)
         TIME_DIFF=$OPTARG
-		;;
+                ;;
     s)
         STREAM_NAME=$OPTARG
-		;;
+                ;;
+    i)
+        INVERT="ON"
+                ;;
   esac
 done
 
@@ -60,8 +73,10 @@ if [ "x${SERVER_URL}" == "x" ] || [ "x${API_KEY}" == "x" ] || [ "x${TIME_DIFF}" 
         exit 99
 fi
 
+write_log "CMD Params: -g ${SERVER_URL} -k ${API_KEY} -t ${TIME_DIFF} -s ${STREAM_NAME}"
+
 STREAM_URL="${SERVER_URL}/streams.json?api_key=${API_KEY}"
-GRAYLOG2_STREAMS_FILE="/tmp/$0.$$.json"
+GRAYLOG2_STREAMS_FILE="/tmp/$$.json"
 
 get_streams_json
 get_stream_index "${STREAM_NAME}"
@@ -71,20 +86,43 @@ rm -rf ${GRAYLOG2_STREAMS_FILE}
 
 if [ ${SEARCH_STATUS} == false ]; then
         echo "Unknown Stream:${STREAM_NAME}"
+        write_log "Unknown Stream:${STREAM_NAME}"
         exit 99
 fi
 
 if [ "${LAST_ALARM}" != "" ]; then
         ALARM_AGE=$(expr $(date +%s) - ${LAST_ALARM})
-        ALARM_TIME=$(date --date="${ALARM_AGE} seconds ago" +%x-%X)
+        #ALARM_TIME=$(date --date="${ALARM_AGE} seconds ago" +%x-%X)
+        ALARM_TIME=$(date --date="${ALARM_AGE} seconds ago" -u )
 else
         ALARM_AGE=""
 fi
 
+ALARM_STATE="UNKNOWN"
+
 if [ "${ALARM_AGE}" != "" ] && [ ${ALARM_AGE} -lt ${TIME_DIFF} ]; then
-        echo "Alarm:ON - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
-        exit 2
+        ALARM_STATE="ON"
+        write_log "Alarm:ON - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
 else
-        echo "Alarm:OFF - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
+        ALARM_STATE="OFF"
+        write_log "Alarm:OFF - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
+fi
+write_log "INVERT=$INVERT"
+
+if [ "${ALARM_STATE}" = "ON" ] && [ "$INVERT" = "OFF" ]; then
+        echo "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
+        write_log "Exit Code:2"
+        exit 2
+elif [ "${ALARM_STATE}" = "OFF" ] && [ "$INVERT" = "OFF" ]; then
+        echo "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
+        write_log "Exit Code:0"
         exit 0
+elif [ "${ALARM_STATE}" = "ON" ] && [ "$INVERT" = "ON" ]; then
+        echo "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
+        write_log "Exit Code:0"
+        exit 0
+elif [ "${ALARM_STATE}" = "OFF" ] && [ "$INVERT" = "ON" ]; then
+        echo "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
+        write_log "Exit Code:2"
+        exit 2
 fi
