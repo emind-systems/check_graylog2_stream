@@ -11,9 +11,11 @@ The script checks for the last-alarm time of the specified stream and:
 
 
 Usage:
+
 	./check_graylog2_stream.sh -g \<graylog server url> -k \<graylog api_key> -t \<alarm age> -s \<stream name>
 	
 Options:
+
 	-i , --INVERT
    	 (default: OFF)
 
@@ -28,7 +30,7 @@ Examples:
 	./check_graylog2_stream.sh -i -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name    
 
 Requirements:
-	The check graylog2 script uses jshon command line that further requires jansson
+	The check_graylog2_stream script uses jshon command line that further requires jansson .
 
 Installation:
 
