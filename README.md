@@ -19,13 +19,13 @@ Options:
 
 Examples:
 
-	1. INVERT=OFF (default) :
+	1. INVERT=OFF (default) --> will return CRITICAL if alarm is ON for more than 300 seconds :
 	
-	./check_graylog2_stream.sh -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name      --> will return CRITICAL if alarm is ON for more than 300 secs
+	./check_graylog2_stream.sh -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name      
 
-	2. INVERT=ON (-i)
+	2. INVERT=ON (-i) --> will return CRITICAL if alarm is OFF for more than 300 seconds:
 	
-	./check_graylog2_stream.sh -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name -i    --> will return CRITICAL if alarm is OFF for more than 300 secs
+	./check_graylog2_stream.sh -i -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name    
 
 Requirements:
 	The check graylog2 script uses jshon command line that further requires jansson
