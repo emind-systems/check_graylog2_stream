@@ -12,7 +12,7 @@ The script checks for the last-alarm time of the specified stream and:
 
 Usage:
 
-	./check_graylog2_stream.sh -g \<graylog server url> -k \<graylog api_key> -t \<alarm age> -s \<stream name>
+	./check_graylog2_stream.sh -g <graylog server url> -k <graylog api_key> -t <alarm age> -s <stream name>
 	
 Options:
 
