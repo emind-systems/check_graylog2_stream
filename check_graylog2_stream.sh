@@ -71,7 +71,7 @@ done
 if [ "x${SERVER_URL}" == "x" ] || [ "x${API_KEY}" == "x" ] || [ "x${TIME_DIFF}" == "x" ] || [ "x${STREAM_NAME}" == "x" ]; then
         echo "Missing input parameter"
         echo "Usage: $0 -g <graylog server url> -k <graylog api_key> -t <alarm age> -s <stream name>"
-        exit 99
+        exit 96
 fi
 
 write_log "CMD Params: -g ${SERVER_URL} -k ${API_KEY} -t ${TIME_DIFF} -s ${STREAM_NAME}"
