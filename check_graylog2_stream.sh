@@ -102,27 +102,27 @@ ALARM_STATE="UNKNOWN"
 
 if [ "${ALARM_AGE}" != "" ] && [ ${ALARM_AGE} -lt ${TIME_DIFF} ]; then
         ALARM_STATE="ON"
-        write_log "Alarm:ON - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
 else
         ALARM_STATE="OFF"
-        write_log "Alarm:OFF - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
 fi
-write_log "INVERT=$INVERT"
+
+write_log "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME} Invert:$INVERT"
+
+echo "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
 
 if [ "${ALARM_STATE}" = "ON" ] && [ "$INVERT" = "OFF" ]; then
-        echo "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
         write_log "Exit Code:2"
         exit 2
 elif [ "${ALARM_STATE}" = "OFF" ] && [ "$INVERT" = "OFF" ]; then
-        echo "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
         write_log "Exit Code:0"
         exit 0
 elif [ "${ALARM_STATE}" = "ON" ] && [ "$INVERT" = "ON" ]; then
-        echo "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
         write_log "Exit Code:0"
         exit 0
 elif [ "${ALARM_STATE}" = "OFF" ] && [ "$INVERT" = "ON" ]; then
-        echo "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
         write_log "Exit Code:2"
         exit 2
+else
+        write_log "Exit Code:99"
+        exit 99
 fi
