@@ -60,6 +60,9 @@ Installation:
 		ln -s /usr/local/lib/libjansson.so.4 /usr/lib/libjansson.so.4
 		ldconfig
 
+	* For debian users
+		Install libjansson-dev by aptitude/apt-get and download and install jshon. Thats all.
+
 
 Copyright 2013 Emind Systems Ltd - htttp://www.emind.co
 This file is part of Emind Systems DevOps Tool set.
