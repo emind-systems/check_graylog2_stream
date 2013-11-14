@@ -29,6 +29,10 @@ Examples:
 	
 	./check_graylog2_stream.sh -i -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name    
 
+	3. If graylog behind https use -c opt:
+
+	./check_graylog2_stream.sh -i -g https://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name -c
+
 Requirements:
 	The check_graylog2_stream script uses jshon command line that further requires jansson .
 
