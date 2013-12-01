@@ -13,6 +13,15 @@ TIME_DIFF=""
 STREAM_NAME=""
 INVERT="OFF"
 ALARM_STATE="UNKNOWN"
+SSL="OFF"
+
+function check_jshon {
+        jshon_cmd=`which jshon`
+        if [ ! -e ${jshon_cmd} ]; then
+            echo "jshon not installed"
+            exit 95
+        fi
+}
 
 function write_log (){
         logger  -t "check_graylog_stream" "pid=$$ Msg=$*"
@@ -20,8 +29,15 @@ function write_log (){
 
 function get_streams_json()
 {
-        curl -s -o ${GRAYLOG2_STREAMS_FILE} ${STREAM_URL}
-        if [ $? -ne 0 ]; then
+        if [ ${SSL} = "OFF" ]; then
+            curl -s -o ${GRAYLOG2_STREAMS_FILE} ${STREAM_URL}
+        elif [ ${SSL} = "ON" ]; then
+            curl -k -s -o ${GRAYLOG2_STREAMS_FILE} ${STREAM_URL}
+        fi
+
+        OUT=$?
+
+        if [ ${OUT} -ne 0 ]; then
                 write_log "failed to fetch json from ${STREAM_URL}"
                 exit 97
         fi
@@ -48,7 +64,7 @@ function get_stream_index
         write_log "TARGET_STREAM_TITLE=${TARGET_STREAM_TITLE} STREAM_INDEX=${STREAM_INDEX}"
 }
 
-while getopts ig:k:t:s: flag; do
+while getopts ig:k:t:s:c flag; do
   case $flag in
     g)
         SERVER_URL=$OPTARG
@@ -65,6 +81,9 @@ while getopts ig:k:t:s: flag; do
     i)
         INVERT="ON"
         ;;
+    c)
+        SSL="ON"
+        ;;
   esac
 done
 
@@ -73,6 +92,8 @@ if [ "x${SERVER_URL}" == "x" ] || [ "x${API_KEY}" == "x" ] || [ "x${TIME_DIFF}" 
         echo "Usage: $0 -g <graylog server url> -k <graylog api_key> -t <alarm age> -s <stream name>"
         exit 96
 fi
+
+check_jshon
 
 write_log "CMD Params: -g ${SERVER_URL} -k ${API_KEY} -t ${TIME_DIFF} -s ${STREAM_NAME}"
 
