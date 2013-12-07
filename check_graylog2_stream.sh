@@ -16,56 +16,80 @@ ALARM_STATE="UNKNOWN"
 SSL="OFF"
 
 function check_jshon {
-        jshon_cmd=`which jshon`
-        if [ ! -e ${jshon_cmd} ]; then
-            echo "jshon not installed"
-            exit 95
-        fi
+    jshon_cmd=`which jshon`
+    if [ ! -e ${jshon_cmd} ]; then
+        echo "jshon not installed"
+        exit 95
+    fi
 }
 
 function write_log (){
-        logger  -t "check_graylog_stream" "pid=$$ Msg=$*"
+        logger -t "check_graylog_stream" "pid=$$ Msg=$*"
 }
 
 function get_streams_json()
 {
-        if [ ${SSL} = "OFF" ]; then
-            curl -s -o ${GRAYLOG2_STREAMS_FILE} ${STREAM_URL}
-        elif [ ${SSL} = "ON" ]; then
-            curl -k -s -o ${GRAYLOG2_STREAMS_FILE} ${STREAM_URL}
-        fi
+    if [ ${SSL} = "OFF" ]; then
+		curl -s -o ${2} ${1}
+    elif [ ${SSL} = "ON" ]; then
+		curl -k -s -o ${2} ${1}
+    fi
 
-        OUT=$?
+	OUT=$?
 
-        if [ ${OUT} -ne 0 ]; then
-                write_log "failed to fetch json from ${STREAM_URL}"
-                exit 97
-        fi
+    if [ ${OUT} -ne 0 ]; then
+		write_log "failed to fetch json from ${1}"
+        exit 97
+    fi
 }
 
 function get_stream_index
 {
-        TARGET_STREAM_TITLE=$1
-        STREAM_INDEX=0
-        CURRENT_STREAM_TITLE=""
-        SEARCH_STATUS=false
-        FIRST_STREAM_TITLE=$(jshon -e ${STREAM_INDEX} -e "title" -u < ${GRAYLOG2_STREAMS_FILE})
-         write_log "FIRST_STREAM_TITLE=${FIRST_STREAM_TITLE}"
-        while true; do
-                CURRENT_STREAM_TITLE=$(jshon -e ${STREAM_INDEX} -e "title" -u < ${GRAYLOG2_STREAMS_FILE})
-                if [ "${TARGET_STREAM_TITLE}" == "${CURRENT_STREAM_TITLE}" ]; then
-                                SEARCH_STATUS=true
-                                break
-                elif [ ${STREAM_INDEX} -gt 0 ] && [ "${CURRENT_STREAM_TITLE}" == "${FIRST_STREAM_TITLE}" ]; then
-                                break
-                fi
-                STREAM_INDEX=$(( ${STREAM_INDEX} + 1 ))
-        done
-        write_log "TARGET_STREAM_TITLE=${TARGET_STREAM_TITLE} STREAM_INDEX=${STREAM_INDEX}"
+    TARGET_STREAM_TITLE=$1
+    STREAM_INDEX=0
+    CURRENT_STREAM_TITLE=""
+    SEARCH_STATUS=false
+	FIRST_STREAM_TITLE=$(jshon -e ${STREAM_INDEX} -e "title" -u < ${GRAYLOG2_STREAMS_FILE})
+    write_log "FIRST_STREAM_TITLE=${FIRST_STREAM_TITLE}"
+    while true; do
+		CURRENT_STREAM_TITLE=$(jshon -e ${STREAM_INDEX} -e "title" -u < ${GRAYLOG2_STREAMS_FILE})
+        if [ "${TARGET_STREAM_TITLE}" == "${CURRENT_STREAM_TITLE}" ]; then
+			SEARCH_STATUS=true
+			break
+		elif [ ${STREAM_INDEX} -gt 0 ] && [ "${CURRENT_STREAM_TITLE}" == "${FIRST_STREAM_TITLE}" ]; then
+			break
+		fi
+		STREAM_INDEX=$(( ${STREAM_INDEX} + 1 ))
+    done
+	write_log "TARGET_STREAM_TITLE=${TARGET_STREAM_TITLE} STREAM_INDEX=${STREAM_INDEX}"
+}
+
+function get_perf_count()
+{
+	VALUE=0
+	
+	OBJECT_COUNT=$(jshon -l < ${1})
+	if [ ${OBJECT_COUNT} -gt 0 ]; then
+	    LAST_OBJECT_IDX=$(expr ${OBJECT_COUNT} - 1)
+	    YOUNGEST_OBJECT_TIMESTAMP=$(jshon -e 0 -e "created_at" -u < ${1})
+	    OLDEST_OBJECT_TIMESTAMP=$(jshon -e ${LAST_OBJECT_IDX} -e "created_at" -u < ${1})
+	
+	    #Time difference in seconds between first and last object
+	    TIME_DIFF=$(echo "scale=0; ${YOUNGEST_OBJECT_TIMESTAMP} - ${OLDEST_OBJECT_TIMESTAMP}" | bc -l)
+	    
+	    #Make sure not to divide by 0
+	    VALID=$(echo "${TIME_DIFF} > 0" | bc -l)
+	    if [ ${VALID} -gt 0 ]; then
+		#Performance value (per minute average)
+		VALUE=$(echo "scale=2; ${OBJECT_COUNT} * 60 / ${TIME_DIFF}" | bc -l)
+	    fi
+	fi
+	
+	echo $VALUE
 }
 
 while getopts ig:k:t:s:c flag; do
-  case $flag in
+case $flag in
     g)
         SERVER_URL=$OPTARG
         ;;
@@ -88,7 +112,7 @@ while getopts ig:k:t:s:c flag; do
 done
 
 if [ "x${SERVER_URL}" == "x" ] || [ "x${API_KEY}" == "x" ] || [ "x${TIME_DIFF}" == "x" ] || [ "x${STREAM_NAME}" == "x" ]; then
-        echo "Missing input parameter"
+echo "Missing input parameter"
         echo "Usage: $0 -g <graylog server url> -k <graylog api_key> -t <alarm age> -s <stream name>"
         exit 96
 fi
@@ -100,45 +124,52 @@ write_log "CMD Params: -g ${SERVER_URL} -k ${API_KEY} -t ${TIME_DIFF} -s ${STREA
 STREAM_URL="${SERVER_URL}/streams.json?api_key=${API_KEY}"
 GRAYLOG2_STREAMS_FILE="/tmp/$$.json"
 
-get_streams_json
+get_streams_json "${STREAM_URL}" "${GRAYLOG2_STREAMS_FILE}"
 get_stream_index "${STREAM_NAME}"
 
 LAST_ALARM=$(jshon -e ${STREAM_INDEX} -e "last_alarm" -u < ${GRAYLOG2_STREAMS_FILE} 2> /dev/null)
+STREAM_ID=$(jshon -e ${STREAM_INDEX} -e "_id" -u < ${GRAYLOG2_STREAMS_FILE} 2> /dev/null)
 rm -rf ${GRAYLOG2_STREAMS_FILE}
 
 if [ ${SEARCH_STATUS} == false ]; then
-        echo "Unknown Stream:${STREAM_NAME}"
+echo "Unknown Stream:${STREAM_NAME}"
         write_log "Unknown Stream:${STREAM_NAME}"
         exit 98
 fi
 
 if [ "${LAST_ALARM}" != "" ]; then
-        ALARM_AGE=$(expr $(date +%s) - ${LAST_ALARM})
-        ALARM_TIME=$(date --date="${ALARM_AGE} seconds ago" -u )
+	ALARM_AGE=$(expr $(date +%s) - ${LAST_ALARM})
+    ALARM_TIME=$(date --date="${ALARM_AGE} seconds ago" -u )
 else
-        ALARM_AGE=""
+	ALARM_AGE=""
 fi
 
 if [ "${ALARM_AGE}" != "" ] && [ ${ALARM_AGE} -lt ${TIME_DIFF} ]; then
-        ALARM_STATE="ON"
+	ALARM_STATE="ON"
 else
-        ALARM_STATE="OFF"
+	ALARM_STATE="OFF"
 fi
 
 if [ "${ALARM_STATE}" = "ON" ] && [ "$INVERT" = "OFF" ]; then
-        EXIT_CODE=2
+	EXIT_CODE=2
 elif [ "${ALARM_STATE}" = "OFF" ] && [ "$INVERT" = "OFF" ]; then
-        EXIT_CODE=0
+	EXIT_CODE=0
 elif [ "${ALARM_STATE}" = "ON" ] && [ "$INVERT" = "ON" ]; then
-        EXIT_CODE=0
+	EXIT_CODE=0
 elif [ "${ALARM_STATE}" = "OFF" ] && [ "$INVERT" = "ON" ]; then
-        EXIT_CODE=2
+	EXIT_CODE=2
 else
-        EXIT_CODE=99
+	EXIT_CODE=99
 fi
 
-write_log "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME} Invert:$INVERT"
+#Get performance data
+PERF_STREAM_URL="${SERVER_URL}/streams/${STREAM_ID}/messages.json?api_key=${API_KEY}"
+get_streams_json "${PERF_STREAM_URL}" "${GRAYLOG2_STREAMS_FILE}"
+PERF_VALUE=$(get_perf_count "${GRAYLOG2_STREAMS_FILE}")
+rm -rf ${GRAYLOG2_STREAMS_FILE}
+
+write_log "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME} Invert:$INVERT | avg-msg-min=${PERF_VALUE}"
 write_log "EXIT_CODE=${EXIT_CODE}"
 
-echo "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME}"
+echo "Alarm:${ALARM_STATE} - Stream:${STREAM_NAME} Last-alarm:${ALARM_TIME} | avg-msg-min=${PERF_VALUE};"
 exit ${EXIT_CODE}
