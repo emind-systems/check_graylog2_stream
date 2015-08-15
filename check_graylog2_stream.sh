@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # --------- License Info ---------
-# Copyright 2013 Emind Systems Ltd - htttp://www.emind.co
-# This file is part of Emind Systems DevOps Tool set.
-# Emind Systems DevOps Tool set is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-# Emind Systems DevOps Tool set is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License along with Emind Systems DevOps Tool set. If not, see http://www.gnu.org/licenses/.
+# Copyright (c) 2013 Emind Systems Ltd. - http://www.emind.co
+# This file is part of Emind Systems DevOps Toolset.
+# Emind Systems DevOps Toolset is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+# Emind Systems DevOps Toolset is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License along with Emind Systems DevOps Toolset. If not, see http://www.gnu.org/licenses.
 
 SERVER_URL=""
 API_KEY=""
@@ -67,16 +67,16 @@ function get_stream_index
 function get_perf_count()
 {
 	VALUE=0
-	
+
 	OBJECT_COUNT=$(jshon -l < ${1})
 	if [ ${OBJECT_COUNT} -gt 0 ]; then
 	    LAST_OBJECT_IDX=$(expr ${OBJECT_COUNT} - 1)
 	    YOUNGEST_OBJECT_TIMESTAMP=$(jshon -e 0 -e "created_at" -u < ${1})
 	    OLDEST_OBJECT_TIMESTAMP=$(jshon -e ${LAST_OBJECT_IDX} -e "created_at" -u < ${1})
-	
+
 	    #Time difference in seconds between first and last object
 	    TIME_DIFF=$(echo "scale=0; ${YOUNGEST_OBJECT_TIMESTAMP} - ${OLDEST_OBJECT_TIMESTAMP}" | bc -l)
-	    
+
 	    #Make sure not to divide by 0
 	    VALID=$(echo "${TIME_DIFF} > 0" | bc -l)
 	    if [ ${VALID} -gt 0 ]; then
@@ -84,7 +84,7 @@ function get_perf_count()
 		VALUE=$(echo "scale=2; ${OBJECT_COUNT} * 60 / ${TIME_DIFF}" | bc -l)
 	    fi
 	fi
-	
+
 	echo $VALUE
 }
 

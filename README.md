@@ -13,7 +13,7 @@ The script checks for the last-alarm time of the specified stream and:
 Usage:
 
 	./check_graylog2_stream.sh -g <graylog server url> -k <graylog api_key> -t <alarm age> -s <stream name> [-i]
-	
+
 Options:
 
 	-i , --INVERT
@@ -22,12 +22,12 @@ Options:
 Examples:
 
 	1. INVERT=OFF (default) --> will return CRITICAL if alarm is ON for more than 300 seconds :
-	
-	./check_graylog2_stream.sh -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name      
+
+	./check_graylog2_stream.sh -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name
 
 	2. INVERT=ON (-i) --> will return CRITICAL if alarm is OFF for more than 300 seconds:
-	
-	./check_graylog2_stream.sh -i -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name    
+
+	./check_graylog2_stream.sh -i -g http://graylog2.mycorp.com -k da1c06b0e21ffd5cb52bb6e4230fb3439f6b99e8 -t 300 -s My-Stream-Name
 
 	3. If graylog behind https use -c opt:
 
@@ -55,7 +55,7 @@ Installation:
 		make
 		cp jshon /bin/
 
-	* Update libs		
+	* Update libs
 		cd /usr/local/lib
 		ln -s /usr/local/lib/libjansson.so.4 /usr/lib/libjansson.so.4
 		ldconfig
@@ -63,11 +63,7 @@ Installation:
 	* For debian users
 		Install libjansson-dev by aptitude/apt-get and download and install jshon. Thats all.
 
+License
+-------
 
-Copyright 2013 Emind Systems Ltd - htttp://www.emind.co
-This file is part of Emind Systems DevOps Tool set.
-Emind Systems DevOps Tool set is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-Emind Systems DevOps Tool set is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with Emind Systems DevOps Tool set. If not, see http://www.gnu.org/licenses/.
-
-[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/d6cdf2b04c37fd42080405b5dca7b1ae "githalytics.com")](http://githalytics.com/emind-systems/check_graylog2_stream)
+See the [LICENSE](LICENSE.md) file for license rights and limitations.
